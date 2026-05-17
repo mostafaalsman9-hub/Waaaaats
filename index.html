@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>واتساب إكسبورتر - استخراج أعضاء الجروب</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #075E54 0%, #128C7E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 28px;
+            max-width: 550px;
+            width: 100%;
+            padding: 40px 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .logo span {
+            font-size: 45px;
+        }
+
+        h1 {
+            color: #075E54;
+            font-size: 26px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #667781;
+            font-size: 14px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            text-align: right;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: #f9fafb;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #25D366;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            background: #128C7E;
+            transform: scale(1.02);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .status {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border-right: 4px solid #22c55e;
+            display: flex;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-right: 4px solid #ef4444;
+            display: flex;
+        }
+
+        .status.loading {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-right: 4px solid #0ea5e9;
+            display: flex;
+        }
+
+        .download-area {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .download-btn {
+            background: #075E54;
+            margin-top: 0;
+        }
+
+        .download-btn:hover {
+            background: #054a41;
+        }
+
+        .info-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f0f2f5;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #54656f;
+            text-align: right;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+        }
+
+        .info-box strong {
+            color: #075E54;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <span>📱</span>
+        </div>
+        <h1>واتساب إكسبورتر</h1>
+        <div class="subtitle">استخراج أسماء وأرقام أعضاء الجروب إلى إكسيل</div>
+
+        <form id="exportForm">
+            <div class="input-group">
+                <label>🔗 رابط الجروب أو اسمه</label>
+                <input 
+                    type="text" 
+                    id="groupInput" 
+                    placeholder="مثال: https://chat.whatsapp.com/xxxx  أو  اسم الجروب"
+                    required
+                >
+            </div>
+            <button type="submit" id="submitBtn">
+                <span>🚀</span> بدء الاستخراج
+            </button>
+        </form>
+
+        <div id="status" class="status"></div>
+
+        <div id="downloadArea" class="download-area">
+            <button id="downloadBtn" class="download-btn">
+                <span>📥</span> تحميل ملف إكسيل
+            </button>
+        </div>
+
+        <div class="info-box">
+            <p><strong>📌 كيفية الاستخدام:</strong></p>
+            <p>1️⃣ أدخل رابط دعوة الجروب أو اكتب اسمه بالضبط</p>
+            <p>2️⃣ اضغط "بدء الاستخراج" (سيتم فتح واتساب ويب)</p>
+            <p>3️⃣ امسح رمز QR أول مرة فقط لتسجيل الدخول</p>
+            <p>4️⃣ انتظر حتى يتم استخراج الأعضاء تلقائياً</p>
+            <p>⚠️ <strong>تنبيه:</strong> تأكد من أنك عضو في الجروب</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('exportForm');
+        const groupInput = document.getElementById('groupInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('status');
+        const downloadArea = document.getElementById('downloadArea');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        function showStatus(message, type) {
+            statusDiv.innerHTML = '';
+            statusDiv.className = 'status';
+            
+            let icon = '';
+            if (type === 'success') icon = '✅ ';
+            else if (type === 'error') icon = '❌ ';
+            else if (type === 'loading') icon = '<div class="spinner"></div> ';
+            
+            statusDiv.innerHTML = icon + message;
+            statusDiv.classList.add(type);
+        }
+
+        function hideStatus() {
+            statusDiv.className = 'status';
+            statusDiv.style.display = 'none';
+        }
+
+        async function checkFileExists() {
+            try {
+                const response = await fetch('/check_file');
+                const data = await response.json();
+                if (data.exists) {
+                    downloadArea.style.display = 'block';
+                } else {
+                    downloadArea.style.display = 'none';
+                }
+            } catch (error) {
+                console.log('Error checking file:', error);
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const groupValue = groupInput.value.trim();
+            if (!groupValue) {
+                showStatus('يرجى إدخال رابط الجروب أو اسمه', 'error');
+                return;
+            }
+
+            // إخفاء زر التحميل القديم
+            downloadArea.style.display = 'none';
+            
+            // حالة التحميل
+            showStatus('جاري استخراج الأعضاء... قد يستغرق 30-60 ثانية', 'loading');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+
+            try {
+                const response = await fetch('/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'group_url=' + encodeURIComponent(groupValue)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus(data.message, 'success');
+                    downloadArea.style.display = 'block';
+                } else {
+                    showStatus(data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('حدث خطأ في الاتصال بالخادم', 'error');
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        });
+
+        downloadBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/download');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'members.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showStatus('تم بدء التحميل', 'success');
+                    setTimeout(() => {
+                        const statusDivClone = statusDiv;
+                        setTimeout(() => {
+                            if (statusDivClone.classList.contains('success')) {
+                                statusDivClone.style.display = 'none';
+                            }
+                        }, 2000);
+                    }, 1000);
+                } else {
+                    showStatus('فشل التحميل، حاول مرة أخرى', 'error');
+                }
+            } catch (error) {
+                showStatus('خطأ في التحميل', 'error');
+            }
+        });
+
+        // التحقق من وجود ملف عند تحميل الصفحة
+        checkFileExists();
+        
+        // التحقق كل 3 ثوانٍ (لحين ظهور الملف بعد الاستخراج)
+        setInterval(checkFileExists, 3000);
+    </script>
+</body>
+</html>
